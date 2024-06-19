@@ -1,0 +1,102 @@
+Need to create a graphing calculator using Python that can take input and do the following:
+
+Graph one or more functions
+Create a table of (x,y) values
+Shade above or below the line
+Solve and graph a system of equations
+Zoom in or out on a graph
+Solve quadratic equations
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+class GraphingCalculator:
+    def __init__(self):
+        self.fig, self.ax = plt.subplots()
+        
+    def plot_function(self, func, x_range, label=''):
+        x = np.linspace(x_range[0], x_range[1], 400)
+        y = func(x)
+        self.ax.plot(x, y, label=label)
+    
+    def create_table(self, func, x_range, step=1):
+        x_values = np.arange(x_range[0], x_range[1], step)
+        y_values = func(x_values)
+        table = list(zip(x_values, y_values))
+        return table
+    
+    def shade_area(self, func, x_range, above=True):
+        x = np.linspace(x_range[0], x_range[1], 400)
+        y = func(x)
+        if above:
+            self.ax.fill_between(x, y, max(y), alpha=0.3)
+        else:
+            self.ax.fill_between(x, y, min(y), alpha=0.3)
+    
+    def solve_system(self, funcs):
+        x = np.linspace(-10, 10, 400)
+        y_vals = [func(x) for func in funcs]
+        for i in range(len(funcs)):
+            self.ax.plot(x, y_vals[i], label=f'Function {i+1}')
+        intersections = np.argwhere(np.isclose(y_vals[0], y_vals[1], atol=0.1))
+        for intersection in intersections:
+            self.ax.plot(x[intersection], y_vals[0][intersection], 'ro')
+    
+    def solve_quadratic(self, a, b, c):
+        discriminant = b**2 - 4*a*c
+        if discriminant > 0:
+            root1 = (-b + np.sqrt(discriminant)) / (2*a)
+            root2 = (-b - np.sqrt(discriminant)) / (2*a)
+            return root1, root2
+        elif discriminant == 0:
+            root = -b / (2*a)
+            return root,
+        else:
+            return ()
+    
+    def plot_quadratic(self, a, b, c):
+        def quadratic(x):
+            return a*x**2 + b*x + c
+        
+        x_range = [-10, 10]
+        self.plot_function(quadratic, x_range, label='Quadratic Function')
+        roots = self.solve_quadratic(a, b, c)
+        for root in roots:
+            self.ax.plot(root, 0, 'ro')
+    
+    def zoom(self, x_range, y_range):
+        self.ax.set_xlim(x_range)
+        self.ax.set_ylim(y_range)
+    
+    def show(self):
+        self.ax.legend()
+        plt.show()
+
+# Example usage:
+calculator = GraphingCalculator()
+
+# Plot functions
+calculator.plot_function(lambda x: x**2, [-10, 10], label='y = x^2')
+calculator.plot_function(lambda x: np.sin(x), [-10, 10], label='y = sin(x)')
+
+# Create table of values
+table = calculator.create_table(lambda x: x**2, [-5, 6])
+print("Table of values (x, y):", table)
+
+# Shade area below y = x^2
+calculator.shade_area(lambda x: x**2, [-10, 10], above=False)
+
+# Solve and graph system of equations
+calculator.solve_system([lambda x: x, lambda x: 2*x - 1])
+
+# Solve quadratic equation and plot
+roots = calculator.solve_quadratic(1, -3, 2)
+print("Roots of the quadratic equation:", roots)
+calculator.plot_quadratic(1, -3, 2)
+
+# Zoom in the graph
+calculator.zoom([-5, 5], [-10, 10])
+
+# Show plot
+calculator.show()
+
